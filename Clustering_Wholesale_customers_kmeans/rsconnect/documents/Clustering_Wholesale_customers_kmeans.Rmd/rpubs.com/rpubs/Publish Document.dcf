@@ -1,8 +1,0 @@
-name: Publish Document
-title:
-account: rpubs
-server: rpubs.com
-appId: https://api.rpubs.com/api/v1/document/398634/7fe52897aacb4a1da35da20cf24509e8
-bundleId: https://api.rpubs.com/api/v1/document/398634/7fe52897aacb4a1da35da20cf24509e8
-url: http://rpubs.com/jprakash0205/398634/edit
-when: 1529472800.95113
