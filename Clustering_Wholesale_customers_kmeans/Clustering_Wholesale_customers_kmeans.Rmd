@@ -1,0 +1,144 @@
+---
+title: "Clustering Wholesale Customers Using Kmeans : (Optimal K - Silhouette Method)"
+output: html_notebook
+---
+
+#### Introduction
+
+  This demonstration is about clustering using **Kmeans** and also determining the optimal number of clusters (k) using **Silhouette Method**.
+
+#### Dataset
+
+  This data set is taken from UCI Machine Learning Repository. The data set refers to clients of a wholesale distributor. It includes the annual spending in monetary units (m.u.) on diverse product categories
+
+Attribute Information:
+
+1)	FRESH: annual spending (m.u.) on fresh products (Continuous); 
+2)	MILK: annual spending (m.u.) on milk products (Continuous); 
+3)	GROCERY: annual spending (m.u.)on grocery products (Continuous); 
+4)	FROZEN: annual spending (m.u.)on frozen products (Continuous) 
+5)	DETERGENTS_PAPER: annual spending (m.u.) on detergents and paper products (Continuous) 
+6)	DELICATESSEN: annual spending (m.u.)on and delicatessen products (Continuous); 
+7)	CHANNEL: customers Channel - Horeca (Hotel/Restaurant/Cafe) or Retail channel (Nominal) 
+8)	REGION: customers Region  Lisnon, Oporto or Other (Nominal)
+
+#### Loading the libraries
+`cluster` library is loaded for clustering algorithms and `factoextra` is loaded for visualization.
+```{r}
+# install.packages('corrplot')
+library(corrplot)
+
+# Clustering
+library(cluster) 
+library(factoextra)
+```
+
+#### Loading Data set
+```{r}
+data <- read.csv('Wholesale customers data.csv', header = TRUE)
+head(data,5)
+```
+#### EDA
+
+* Structure of data
+* Summary statistics
+* Correlation Plot
+
+```{r}
+data <- na.omit(data)
+
+str(data)
+
+summary(data)
+
+corrmatrix <- cor(data)
+corrplot(corrmatrix, method = 'number')
+# corrplot.mixed(corrmatrix, upper='number', lower='color', order='hclust')
+```
+
+#### Data Preparation
+
+  All the attributes are of same scale except **"channel""** and **"region"**. We can ignore those attributes for clustering and normalization is not required.
+  
+```{r}
+df <- data[-c(1,2)]
+head(df,3)
+```
+
+### Clustering 
+
+#### Kmeans
+
+  Kmeans algorithm is the most commonly used unsupervised machine learning algorithm used to partition the data into a set of k groups or clusters.
+  
+#### How Kmeans works?
+
+1. Define the number of clusters (k)
+2. Identify or select k initial centroids by random assignment
+3. **Assign** each observation to the closest centroid (center-point) by calculting euclidean distance between centroids and observations.
+4. For each cluster, **update** the centroid by calculating the mean values of all observations within each cluster such that least squared euclidean distance between centroid and observation is minimized.
+5. Repeat both assignment and update step (steps 3 & 4) until convergence (minimum total sum of square) or maximum iteration is reached.
+
+#### Determining optimal number of clusters (k)
+
+  Before we do the actual clustering, we need to identity the Optimal number of clusters (k) for this data set of wholesale customers. The popular way of determining number of clusters are
+
+1. Elbow Method
+2. Silhouette Method
+3. Gap Static Method
+
+  Elbow and  Silhouette methods are direct methods and gap statistic method is the statistics method.
+
+In this demonstration, we are going to see how silhouette method is used.
+
+```{r}
+silhouette_score <- function(k){
+  km <- kmeans(df, centers = k, nstart=25)
+  ss <- silhouette(km$cluster, dist(df))
+  print(ss)
+  mean(ss[, 3])
+}
+
+k <- 2:10
+
+avg_sil <- sapply(k, silhouette_score)
+plot(k, type='b', avg_sil, xlab='Number of clusters', ylab='Average Silhouette Scores', frame=FALSE)
+
+```
+The above method of calculating silhouette score using `silhouette()` and plotting the results states that **optimal number of clusters as 2**
+
+The other method with visual aid is using `factoextra` package
+
+```{r}
+fviz_nbclust(df, kmeans, method='silhouette')
+```
+
+
+**The optimal number of clusters is 2.**
+
+
+#### Actual Clustering
+```{r}
+km.final <- kmeans(df, 2)
+
+## Total Within cluster sum of square
+km.final$tot.withinss
+
+## Cluster sizes
+km.final$size
+
+data$cluster <- km.final$cluster
+
+head(data, 6)
+
+```
+
+```{r}
+fviz_cluster(km.final, data=df)
+
+clusplot(data, data$cluster, color=TRUE, shade = TRUE, label=2)
+```
+#### Conclusion
+
+  We had seen kmeans clustering of wholesale customers and how average silhouette measure is used to identify optimal number of clusters. In the next article, we will see about various other methods for determining optimal number of clusters.
+
