@@ -6,6 +6,7 @@ output: html_notebook
 #### Introduction
 
   This demonstration is about clustering using **Kmeans** and also determining the optimal number of clusters (k) using **Silhouette Method**.
+  The code for this article is hosted <a href='https://github.com/jprakash0205/RDataScience'>here.</a>
 
 #### Dataset
 
