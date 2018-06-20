@@ -54,12 +54,11 @@ summary(data)
 
 corrmatrix <- cor(data)
 corrplot(corrmatrix, method = 'number')
-# corrplot.mixed(corrmatrix, upper='number', lower='color', order='hclust')
 ```
 
 #### Data Preparation
 
-  All the attributes are of same scale except **"channel""** and **"region"**. We can ignore those attributes for clustering and normalization is not required.
+  All the attributes are of same scale except **"channel"** and **"region"**. We can ignore those attributes for clustering and normalization is not required.
   
 ```{r}
 df <- data[-c(1,2)]
@@ -70,25 +69,25 @@ head(df,3)
 
 #### Kmeans
 
-  Kmeans algorithm is the most commonly used unsupervised machine learning algorithm used to partition the data into a set of k groups or clusters.
+  Kmeans algorithm (also referred as Lloyd's algorithm) is the most commonly used unsupervised machine learning algorithm used to partition the data into a set of k groups or clusters.
   
 #### How Kmeans works?
 
-1. Define the number of clusters (k)
-2. Identify or select k initial centroids by random assignment
-3. **Assign** each observation to the closest centroid (center-point) by calculting euclidean distance between centroids and observations.
-4. For each cluster, **update** the centroid by calculating the mean values of all observations within each cluster such that least squared euclidean distance between centroid and observation is minimized.
-5. Repeat both assignment and update step (steps 3 & 4) until convergence (minimum total sum of square) or maximum iteration is reached.
+1. Define the number of clusters (k).
+2. Initialize k centroids by randomly.
+3. **Assignment Step:** Assign each observation to the closest centroid (center-point) by calculting least squared euclidean distance between centroids and observations. (i.e. least squared euclidean distance between assigned center and observation should be minimum than other centers).
+4. **Update Step:** Calculate the new means as centroids for new clusters.
+5. Repeat both assignment and update step (i.e. steps 3 & 4) until convergence (minimum total sum of square) or maximum iteration is reached.
 
 #### Determining optimal number of clusters (k)
 
   Before we do the actual clustering, we need to identity the Optimal number of clusters (k) for this data set of wholesale customers. The popular way of determining number of clusters are
 
-1. Elbow Method
-2. Silhouette Method
+1. Elbow Method  
+2. **Silhouette Method**
 3. Gap Static Method
 
-  Elbow and  Silhouette methods are direct methods and gap statistic method is the statistics method.
+  Elbow and  Silhouette methods are **direct** methods and gap statistic method is the **statistics** method.
 
 In this demonstration, we are going to see how silhouette method is used.
 
@@ -96,7 +95,6 @@ In this demonstration, we are going to see how silhouette method is used.
 silhouette_score <- function(k){
   km <- kmeans(df, centers = k, nstart=25)
   ss <- silhouette(km$cluster, dist(df))
-  print(ss)
   mean(ss[, 3])
 }
 
@@ -106,6 +104,8 @@ avg_sil <- sapply(k, silhouette_score)
 plot(k, type='b', avg_sil, xlab='Number of clusters', ylab='Average Silhouette Scores', frame=FALSE)
 
 ```
+*Note:* The kmeans() function has an nstart option that attempts multiple initial configurations and reports on the best one. For example, adding nstart=25 will generate 25 initial configurations. This approach is often recommended.
+
 The above method of calculating silhouette score using `silhouette()` and plotting the results states that **optimal number of clusters as 2**
 
 The other method with visual aid is using `factoextra` package
@@ -143,3 +143,6 @@ clusplot(data, data$cluster, color=TRUE, shade = TRUE, label=2)
 
   We had seen kmeans clustering of wholesale customers and how average silhouette measure is used to identify optimal number of clusters. In the next article, we will see about various other methods for determining optimal number of clusters.
 
+#### References
+1. https://home.deib.polimi.it/matteucc/Clustering/tutorial_html/kmeans.html
+2. https://www.rdocumentation.org/packages/cluster/versions/2.0.7-1/topics/silhouette
